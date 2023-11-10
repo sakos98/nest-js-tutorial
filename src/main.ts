@@ -21,6 +21,8 @@ async function bootstrap() {
   app.useGlobalInterceptors(new LoggerInterceptor());
   app.useGlobalFilters(new NotFoundExceptionFilter());
   app.setGlobalPrefix('api');
+
+  await app.enableShutdownHooks();
   await app.listen(3000);
 }
 

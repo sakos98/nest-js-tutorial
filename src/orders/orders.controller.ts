@@ -10,6 +10,7 @@ import {
   Post,
   Body,
   Put,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDTO } from 'src/products/dtos/create-order.dto';
@@ -25,50 +26,35 @@ export class OrdersController {
   }
 
   @Get('/:id')
-  @UsePipes(new ValidationPipe({ transform: true, exceptionFactory: (errors) => new BadRequestException(errors[0].toString()) }))
-  getById(@Param('id') id: string) {
-    const order = this.ordersService.getById(id);
-
-    if (!order) {
-      throw new NotFoundException('Order not found');
-    }
-
+  async getById(@Param('id', new ParseUUIDPipe()) id: string) {
+    const order = await this.ordersService.getById(id);
+    if (!order) throw new NotFoundException('Product not found');
     return order;
   }
 
   @Delete('/:id')
-  @UsePipes(new ValidationPipe({ transform: true, exceptionFactory: (errors) => new BadRequestException(errors[0].toString()) }))
-  deleteById(@Param('id') id: string) {
-    const existingOrder = this.ordersService.getById(id);
-
-    if (!existingOrder) {
-      throw new NotFoundException('Order not found');
-    }
-
-    this.ordersService.deleteById(id);
+  async deleteById(@Param('id', new ParseUUIDPipe()) id: string) {
+    if (!(await this.ordersService.getById(id)))
+      throw new NotFoundException('Product not found');
+    await this.ordersService.deleteById(id);
     return { success: true };
   }
 
-  @Post()
-  @UsePipes(new ValidationPipe({ transform: true, exceptionFactory: (errors) => new BadRequestException(errors[0].toString()) }))
-  createOrder(@Body() createOrderDTO: CreateOrderDTO) {
-    // Tutaj możesz również dodać dodatkową walidację danych
-    const order = this.ordersService.createOrder(createOrderDTO);
-    return order;
+  @Post('/')
+  createOrder(@Body() productData: CreateOrderDTO) {
+    const createdProduct = this.ordersService.createOrder(productData);
+    return createdProduct;
   }
 
   @Put('/:id')
-  @UsePipes(new ValidationPipe({ transform: true, exceptionFactory: (errors) => new BadRequestException(errors[0].toString()) }))
-  updateOrder(@Param('id') id: string, @Body() updateOrderDTO: UpdateOrderDTO) {
-    // Walidacja czy zamówienie istnieje
-    const existingOrder = this.ordersService.getById(id);
-
-    if (!existingOrder) {
-      throw new NotFoundException('Order not found');
-    }
-
-    // Tutaj możesz również dodać dodatkową walidację danych
-    const updatedOrder = this.ordersService.updateOrder(id, updateOrderDTO);
-    return updatedOrder;
+  async update(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() productData: UpdateOrderDTO,
+  ) {
+    if (!(await this.ordersService.getById(id)))
+      throw new NotFoundException('Product not found');
+  
+    await this.ordersService.updateOrder(id, productData);
+    return { success: true };
   }
 }
