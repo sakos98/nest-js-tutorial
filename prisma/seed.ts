@@ -1,6 +1,26 @@
 import { PrismaClient } from '@prisma/client';
 const db = new PrismaClient();
 
+function getClients() {
+  return [
+    {
+      id: 'fd105551-0f0d-4a9f-bc41-c559c8a17270',
+      name: 'John Doe',
+      address: '123 Main Street, London',
+    },
+    {
+      id: '611c2e81-2ccb-42d8-9ddc-2d0bfa65c1b4',
+      name: 'Jane Doe',
+      address: '123 Main Street, London',
+    },
+    {
+      id: '3a721b7f-7dc9-4c45-9777-516942b98e0d',
+      name: 'Thomas Jefferson',
+      address: 'Baker Street 12B, New York',
+    },
+  ];
+}
+
 function getProducts() {
   return [
     {
@@ -36,25 +56,7 @@ function getProducts() {
   ];
 }
 
-function getClients() {
-  return [
-    {
-      id: 'john-doe-id',
-      name: 'John Doe',
-      address: '123 Main Street, London',
-    },
-    {
-      id: 'jane-doe-id',
-      name: 'Jane Doe',
-      address: '123 Main Street, London',
-    },
-    {
-      id: 'thomas-jefferson-id',
-      name: 'Thomas Jefferson',
-      address: 'Baker Street 12B, New York',
-    },
-  ];
-}
+
 
 function getOrders() {
   return [
@@ -81,14 +83,14 @@ function getOrders() {
 
 async function seed() {
   await Promise.all(
-    getProducts().map((product) => {
-      return db.product.create({ data: product });
+    getClients().map((client) => {
+      return db.client.create({ data: client });
     }),
   );
 
   await Promise.all(
-    getClients().map((client) => {
-      return db.client.create({ data: client });
+    getProducts().map((product) => {
+      return db.product.create({ data: product });
     }),
   );
 
