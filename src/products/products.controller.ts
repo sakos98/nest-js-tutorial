@@ -20,6 +20,8 @@ export class ProductsController {
     return prod;
   }
 
+
+
   @Delete('/:id')
   async deleteById(@Param('id', new ParseUUIDPipe()) id: string) {
     if (!(await this.productsService.getById(id)))
@@ -29,8 +31,8 @@ export class ProductsController {
   }
 
   @Post('/')
-  create(@Body() productData: CreateProductDTO) {
-    const createdProduct = this.productsService.create(productData);
+  async create(@Body() productData: CreateProductDTO) {
+    const createdProduct = await this.productsService.create(productData);
     return createdProduct;
   }
 
@@ -44,6 +46,18 @@ export class ProductsController {
   
     await this.productsService.updateById(id, productData);
     return { success: true };
+  }
+
+  @Get('/extended')
+  getAllExtended(): any {
+    return this.productsService.getAllExtended();
+  }
+  
+  @Get('/extended/:id')
+  async getExtendedById(@Param('id', new ParseUUIDPipe()) id: string) {
+    const prod = await this.productsService.getExtendedById(id);
+    if (!prod) throw new NotFoundException('Product not found');
+    return prod;
   }
 
 }

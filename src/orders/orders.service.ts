@@ -1,5 +1,5 @@
 import { PrismaService } from 'src/shared/services/prisma.service';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Order } from '@prisma/client';
 
 @Injectable()
@@ -8,12 +8,13 @@ export class OrdersService {
   orders: any;
 
   public getAll(): Promise<Order[]> {
-    return this.prismaService.order.findMany();
+    return this.prismaService.order.findMany({ include: { product: true } });
   }
 
   public getById(id: Order['id']): Promise<Order | null> {
     return this.prismaService.order.findUnique({
       where: { id },
+      include: { product: true },
     });
   }
 
@@ -23,21 +24,39 @@ export class OrdersService {
     });
   }
 
-  public createOrder(
-    productData: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>,
+  public async createOrder(
+    orderData: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<Order> {
-    return this.prismaService.order.create({
-      data: productData,
-    });
+    const { productId, ...otherData } = orderData;
+    try {
+      return await this.prismaService.order.create({
+        data: {
+          ...otherData,
+          product: {
+            connect: { id: productId },
+          },
+        },
+      });
+    } catch (error) {
+      if (error.code === 'P2025')
+        throw new BadRequestException("Product doesn't exist");
+      throw error;
+    }
   }
 
   public updateOrder(
     id: Order['id'],
-    productData: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>,
+    orderData: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<Order> {
+    const { productId, ...otherData } = orderData;
     return this.prismaService.order.update({
       where: { id },
-      data: productData,
+      data: {
+        ...otherData,
+        product: {
+          connect: { id: productId },
+        },
+      },
     });
   }
 }
