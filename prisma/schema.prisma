@@ -16,7 +16,8 @@ model Product {
   price       Float
   description String
   orders      Order[]
-  createdAt   DateTime @default(now()) @db.Timestamp
+  createdAt DateTime @default(now()) @db.DateTime(3)
+
   updatedAt   DateTime @updatedAt @db.Timestamp
 }
 
@@ -27,7 +28,8 @@ model Order {
   product   Product  @relation(fields: [productId], references: [id])
   clientId  String
   client    Client   @relation(fields: [clientId], references: [id])
-  createdAt DateTime @default(now()) @db.Timestamp
+  createdAt DateTime @default(now()) @db.DateTime(3)
+
   updatedAt DateTime @updatedAt @db.Timestamp
 }
 
@@ -36,4 +38,8 @@ model Client {
   name    String
   address String
   orders  Order[]
+
+  createdAt DateTime @default(now()) @db.DateTime(3)
+
+  updatedAt   DateTime @updatedAt @db.Timestamp
 }
